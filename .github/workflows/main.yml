@@ -29,4 +29,4 @@ jobs:
           echo "${{ secrets.GOOGLE_TOKEN }}" > token.json
 
       - name: Run script
-        run: main.py
+        run: python main.py
