@@ -23,10 +23,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Restore credentials
-        run: |
-          echo "${{ secrets.GOOGLE_CREDENTIALS }}" > credentials.json
-          echo "${{ secrets.GOOGLE_TOKEN }}" > token.json
-
       - name: Run script
+        env:
+          CREDENTIALS: ${{ GOOGLE_CREDENTIALS }}
+          TOKEN: ${{ secrets.GOOGLE_TOKEN }}
         run: python main.py
