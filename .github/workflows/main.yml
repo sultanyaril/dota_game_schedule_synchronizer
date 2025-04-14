@@ -1,0 +1,32 @@
+name: Sync Team Spirit Matches
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'  # Every 12 hours (adjust as needed)
+  workflow_dispatch:       # Allow manual trigger
+
+jobs:
+  sync-matches:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Restore credentials
+        run: |
+          echo "${{ secrets.GOOGLE_CREDENTIALS }}" > credentials.json
+          echo "${{ secrets.GOOGLE_TOKEN }}" > token.json
+
+      - name: Run script
+        run: main.py
