@@ -25,6 +25,6 @@ jobs:
 
       - name: Run script
         env:
-          CREDENTIALS: ${{ GOOGLE_CREDENTIALS }}
+          CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           TOKEN: ${{ secrets.GOOGLE_TOKEN }}
         run: python main.py
