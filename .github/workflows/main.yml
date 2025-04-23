@@ -2,7 +2,7 @@ name: Sync Team Spirit Matches
 
 on:
   schedule:
-    - cron: '0 */12 * * *'  # Every 12 hours (adjust as needed)
+    - cron: '0 */6 * * *'  # Every 6 hours (adjust as needed)
   workflow_dispatch:       # Allow manual trigger
 
 jobs:
@@ -26,5 +26,5 @@ jobs:
       - name: Run script
         env:
           CREDENTIALS: ${{ GOOGLE_CREDENTIALS }}
-          TOKEN: ${{ secrets.GOOGLE_TOKEN }}
+          CALENDAR_ID: ${{ secrets.CALENDAR_ID }}
         run: python main.py

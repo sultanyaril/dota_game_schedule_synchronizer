@@ -3,11 +3,11 @@ import datetime
 from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+
 import json
 
 # Load environment variables
@@ -17,29 +17,18 @@ LIQUIPEDIA_URL = f'https://liquipedia.net/dota2/{"_".join(TEAM_NAME.split(" "))}
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
-# Set up Google Calendar API
+
 def get_calendar_service():
-    creds = None
-    if "TOKEN" in os.environ:
-        creds = Credentials.from_authorized_user_info(json.loads(os.environ["TOKEN"]), SCOPES)
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_config(
-                json.loads(os.environ["CREDENTIALS"]), SCOPES
-            )
-            creds = flow.run_local_server(port=0)
-            # Optional: print warning that local auth is not suitable for GitHub Actions
-
     try:
+        creds = service_account.Credentials.from_service_account_info(
+            json.loads(os.environ["CREDENTIALS"]),
+            scopes=SCOPES
+        )
         service = build("calendar", "v3", credentials=creds)
         return service
     except HttpError as error:
         print(f"An error occurred: {error}")
         return None
-
 
 
 # Parse Liquipedia for upcoming matches
@@ -115,7 +104,7 @@ if __name__ == '__main__':
 
     if service and matches:
         calendar_name = f"{TEAM_NAME} Matches"
-        calendar_id = get_or_create_calendar(service, calendar_name)
+        calendar_id = os.environ["CALENDAR_ID"]
         clear_calendar(service, calendar_id)
         for match in matches:
             add_match_to_calendar(service, calendar_id, match)
