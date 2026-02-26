@@ -12,7 +12,7 @@ import json
 
 # Load environment variables
 GOOGLE_CREDENTIALS_FILE = 'credentials.json'
-TEAM_NAME = "PARIVISION"
+TEAM_NAME = "Team Spirit"
 LIQUIPEDIA_URL = f'https://liquipedia.net/dota2/{"_".join(TEAM_NAME.split(" "))}'
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
