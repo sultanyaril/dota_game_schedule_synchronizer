@@ -12,7 +12,7 @@ import json
 
 # Load environment variables
 GOOGLE_CREDENTIALS_FILE = 'credentials.json'
-TEAM_NAME = "Team Spirit"
+TEAM_NAME = "PARIVISION"
 LIQUIPEDIA_URL = f'https://liquipedia.net/dota2/{"_".join(TEAM_NAME.split(" "))}'
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
@@ -39,26 +39,46 @@ def get_upcoming_matches():
 
     matches = []
 
-    # Find match elements (adjust CSS selectors based on actual structure)
-    upcoming_matches = soup.find('div', class_='fo-nttax-infobox panel')
-    if not upcoming_matches:
-        return matches
-
-    for match_table in upcoming_matches.find_all("table"):
-        teams_info, match_info = match_table.find_all('tr')
-        team_left = teams_info.find("td", class_="team-left")
-        team_right = teams_info.find("td", class_="team-right")
-
-        first_team_name = team_left.find("span", class_="team-template-text").text if team_left.find("span", class_="team-template-text") else "TBD"
-        second_team_name = team_right.find("span", class_="team-template-text").text if team_right.find("span", class_="team-template-text") else "TBD"
-        time_info = match_info.find("span", class_="timer-object timer-object-countdown-only")
-        start_time = datetime.utcfromtimestamp(int(time_info['data-timestamp']))
-
-        matches.append({
-            'summary': f'{first_team_name} vs {second_team_name}',
-            'start': start_time,
-            'end': start_time + timedelta(hours=3)
-        })
+    # Find all carousel items containing match information
+    carousel_items = soup.find_all('div', class_='carousel-item')
+    
+    for carousel_item in carousel_items:
+        try:
+            # Extract timestamp from timer-object
+            timer_object = carousel_item.find('span', class_='timer-object')
+            if not timer_object or not timer_object.get('data-timestamp'):
+                continue
+            
+            timestamp = int(timer_object['data-timestamp'])
+            start_time = datetime.utcfromtimestamp(timestamp)
+            
+            # Extract team names from match-info-opponent-row divs
+            opponent_rows = carousel_item.find_all('div', class_='match-info-opponent-row')
+            if len(opponent_rows) < 2:
+                continue
+            
+            # Get team names from span.name within each opponent row
+            team_names = []
+            for opponent_row in opponent_rows[:2]:  # Take first 2 teams
+                name_span = opponent_row.find('span', class_='name')
+                if name_span:
+                    team_name = name_span.get_text(strip=True)
+                    team_names.append(team_name)
+                else:
+                    team_names.append('TBD')
+            
+            if len(team_names) < 2:
+                continue
+            
+            matches.append({
+                'summary': f'{team_names[0]} vs {team_names[1]}',
+                'start': start_time,
+                'end': start_time + timedelta(hours=3)
+            })
+        except (AttributeError, ValueError, IndexError):
+            # Skip matches that don't have required data
+            continue
+    
     return matches
 
 
